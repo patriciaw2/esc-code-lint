@@ -55,6 +55,9 @@ reported, `2` on a usage or read error.
   a recognized sequence start.
 - `no-raw-control-chars` - a C0 control byte other than tab, newline, or
   carriage return shows up outside any escape sequence.
+- `no-unpaired-hyperlink` - an OSC 8 hyperlink (`ESC ] 8 ; params ; URI ST`)
+  is opened but never closed, closed without ever having been opened, or
+  opened again before the previous one was closed.
 
 ## Library use
 
@@ -64,5 +67,5 @@ write your own rules against the token stream.
 
 ## Status
 
-Early skeleton. Single-file scanning from the CLI, three rules, no config
+Early skeleton. Single-file scanning from the CLI, four rules, no config
 file yet. See the roadmap in the project notes for what's next.

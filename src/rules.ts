@@ -1,5 +1,7 @@
 import { tokenize, type Token } from './scanner.js'
 
+const BEL = 0x07
+
 export interface Finding {
   line: number
   col: number
@@ -60,7 +62,67 @@ const noRawControlChars: Rule = {
   },
 }
 
-export const rules: Rule[] = [noUnterminatedEscape, noBareEsc, noRawControlChars]
+// Pulls the URI out of an OSC 8 hyperlink sequence's raw text, if that's
+// what the sequence is. Returns null for any other OSC sequence. The scanner
+// already validated that `raw` reaches a BEL or ST terminator, so this only
+// has to strip that terminator and split the body on ';'.
+function parseHyperlinkUri(raw: string): string | null {
+  const body = raw.charCodeAt(raw.length - 1) === BEL ? raw.slice(2, -1) : raw.slice(2, -2)
+  if (!body.startsWith('8;')) return null
+  const params = body.slice(2)
+  const sep = params.indexOf(';')
+  if (sep === -1) return null
+  return params.slice(sep + 1)
+}
+
+const noUnpairedHyperlink: Rule = {
+  id: 'no-unpaired-hyperlink',
+  check(tokens) {
+    const findings: Finding[] = []
+    let openToken: Token | null = null
+
+    for (const t of tokens) {
+      if (t.kind !== 'osc') continue
+      const uri = parseHyperlinkUri(t.raw)
+      if (uri === null) continue
+
+      if (uri === '') {
+        if (!openToken) {
+          findings.push({
+            line: t.line,
+            col: t.col,
+            ruleId: noUnpairedHyperlink.id,
+            message: 'OSC 8 hyperlink close has no matching open',
+          })
+        }
+        openToken = null
+      } else {
+        if (openToken) {
+          findings.push({
+            line: openToken.line,
+            col: openToken.col,
+            ruleId: noUnpairedHyperlink.id,
+            message: 'OSC 8 hyperlink is opened again before the previous one was closed',
+          })
+        }
+        openToken = t
+      }
+    }
+
+    if (openToken) {
+      findings.push({
+        line: openToken.line,
+        col: openToken.col,
+        ruleId: noUnpairedHyperlink.id,
+        message: 'OSC 8 hyperlink is never closed',
+      })
+    }
+
+    return findings
+  },
+}
+
+export const rules: Rule[] = [noUnterminatedEscape, noBareEsc, noRawControlChars, noUnpairedHyperlink]
 
 export function lint(source: string): Finding[] {
   const tokens = tokenize(source)
