@@ -47,6 +47,18 @@ fixture.log:2:12: OSC sequence is missing its BEL or ST terminator [no-untermina
 Exit code is `0` when a file has no findings, `1` when findings were
 reported, `2` on a usage or read error.
 
+Pass `--json` to get machine-readable output instead: an array of
+`{ path, findings }` objects, one per file argument, written as a single
+JSON line to stdout.
+
+```sh
+node dist/cli.js --json fixture.log
+```
+
+```json
+[{"path":"fixture.log","findings":[{"line":2,"col":12,"ruleId":"no-unterminated-escape","message":"OSC sequence is missing its BEL or ST terminator"}]}]
+```
+
 ## Rules
 
 - `no-unterminated-escape` - a CSI, OSC, or DCS sequence starts but never
@@ -67,5 +79,6 @@ write your own rules against the token stream.
 
 ## Status
 
-Early skeleton. Single-file scanning from the CLI, four rules, no config
-file yet. See the roadmap in the project notes for what's next.
+Early skeleton. Single-file scanning from the CLI, four rules, text or
+JSON output, no config file or recursive directory scanning yet. See the
+roadmap in the project notes for what's next.
