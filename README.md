@@ -44,6 +44,24 @@ running the linter against that content reports:
 fixture.log:2:12: OSC sequence is missing its BEL or ST terminator [no-unterminated-escape]
 ```
 
+Directory arguments are scanned recursively:
+
+```sh
+node dist/cli.js src/
+```
+
+`node_modules`, `.git`, and `dist` are skipped by default. Pass `--ignore`
+(repeatable) with a name or a `*` glob to skip more, matched against each
+path segment's basename:
+
+```sh
+node dist/cli.js --ignore '*.min.js' --ignore fixtures src/
+```
+
+A file passed directly on the command line is always scanned, even if its
+name matches an ignore pattern - ignore patterns only prune directory
+walks.
+
 Exit code is `0` when a file has no findings, `1` when findings were
 reported, `2` on a usage or read error.
 
@@ -79,6 +97,7 @@ write your own rules against the token stream.
 
 ## Status
 
-Early skeleton. Single-file scanning from the CLI, four rules, text or
-JSON output, no config file or recursive directory scanning yet. See the
-roadmap in the project notes for what's next.
+Early skeleton. Four rules, text or JSON output, recursive directory
+scanning with ignore patterns. No config file yet for enabling/disabling
+individual rules, and no test suite. See the roadmap in the project notes
+for what's next.
