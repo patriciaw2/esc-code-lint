@@ -89,6 +89,28 @@ node dist/cli.js --json fixture.log
   is opened but never closed, closed without ever having been opened, or
   opened again before the previous one was closed.
 
+## Configuration
+
+By default all rules run. To turn individual rules off, add a
+`.esc-code-lintrc.json` file in the directory you run the linter from:
+
+```json
+{
+  "rules": {
+    "no-raw-control-chars": false
+  }
+}
+```
+
+Any rule id not mentioned stays enabled; setting one to `true` is allowed
+but has no effect since that's already the default. An unknown rule id in
+the file is an error, not a silent no-op. Pass `--config <path>` to load a
+config file from somewhere other than the current directory:
+
+```sh
+node dist/cli.js --config ci/esc-lint-strict.json src/
+```
+
 ## Library use
 
 `src/rules.ts` exports `lint(source: string): Finding[]`, and `src/scanner.ts`
@@ -98,6 +120,6 @@ write your own rules against the token stream.
 ## Status
 
 Early skeleton. Four rules, text or JSON output, recursive directory
-scanning with ignore patterns. No config file yet for enabling/disabling
-individual rules, and no test suite. See the roadmap in the project notes
+scanning with ignore patterns, and a config file for enabling/disabling
+individual rules. No test suite yet. See the roadmap in the project notes
 for what's next.

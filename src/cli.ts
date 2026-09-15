@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { lint, type Finding } from './rules.js'
+import { lint, rules, type Finding } from './rules.js'
+import { applyConfig, loadConfig } from './config.js'
 
 interface FileFindings {
   path: string
@@ -59,6 +60,7 @@ function collectFiles(paths: string[], patterns: RegExp[]): string[] {
 function main(argv: string[]): number {
   const args = argv.slice(2)
   let jsonOutput = false
+  let configPath: string | undefined
   const rawPaths: string[] = []
   const ignoreGlobs: string[] = [...DEFAULT_IGNORE]
 
@@ -75,13 +77,32 @@ function main(argv: string[]): number {
       ignoreGlobs.push(value)
     } else if (arg.startsWith('--ignore=')) {
       ignoreGlobs.push(arg.slice('--ignore='.length))
+    } else if (arg === '--config') {
+      const value = args[++i]
+      if (value === undefined) {
+        process.stderr.write('--config requires a path argument\n')
+        return 2
+      }
+      configPath = value
+    } else if (arg.startsWith('--config=')) {
+      configPath = arg.slice('--config='.length)
     } else {
       rawPaths.push(arg)
     }
   }
 
   if (rawPaths.length === 0) {
-    process.stderr.write('usage: esc-code-lint [--json] [--ignore <pattern>] <file|dir> [file|dir...]\n')
+    process.stderr.write(
+      'usage: esc-code-lint [--json] [--ignore <pattern>] [--config <path>] <file|dir> [file|dir...]\n',
+    )
+    return 2
+  }
+
+  let activeRules
+  try {
+    activeRules = applyConfig(rules, loadConfig(configPath, process.cwd()))
+  } catch (err) {
+    process.stderr.write(`${(err as Error).message}\n`)
     return 2
   }
 
@@ -101,7 +122,7 @@ function main(argv: string[]): number {
       continue
     }
 
-    const findings = lint(source)
+    const findings = lint(source, activeRules)
     if (findings.length > 0) exitCode = 1
 
     if (jsonOutput) {

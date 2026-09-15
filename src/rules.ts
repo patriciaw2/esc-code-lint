@@ -124,9 +124,9 @@ const noUnpairedHyperlink: Rule = {
 
 export const rules: Rule[] = [noUnterminatedEscape, noBareEsc, noRawControlChars, noUnpairedHyperlink]
 
-export function lint(source: string): Finding[] {
+export function lint(source: string, activeRules: Rule[] = rules): Finding[] {
   const tokens = tokenize(source)
-  const findings = rules.flatMap((rule) => rule.check(tokens))
+  const findings = activeRules.flatMap((rule) => rule.check(tokens))
   findings.sort((a, b) => a.line - b.line || a.col - b.col)
   return findings
 }
