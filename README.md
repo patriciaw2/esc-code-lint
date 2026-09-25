@@ -117,9 +117,19 @@ node dist/cli.js --config ci/esc-lint-strict.json src/
 exports the lower-level `tokenize(source: string): Token[]` if you want to
 write your own rules against the token stream.
 
+## Development
+
+```sh
+npm test
+```
+
+Runs the tokenizer's unit test suite with Node's built-in test runner
+(`node --test`) against the compiled output in `dist/`, so it builds first.
+
 ## Status
 
 Early skeleton. Four rules, text or JSON output, recursive directory
-scanning with ignore patterns, and a config file for enabling/disabling
-individual rules. No test suite yet. See the roadmap in the project notes
-for what's next.
+scanning with ignore patterns, a config file for enabling/disabling
+individual rules, and unit tests covering the tokenizer's edge cases.
+Not yet published to npm. See the roadmap in the project notes for what's
+next.

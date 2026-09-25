@@ -12,7 +12,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "npm run build && node --test dist/*.test.js"
   },
   "engines": {
     "node": ">=18"
