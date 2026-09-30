@@ -2,18 +2,42 @@
   "name": "esc-code-lint",
   "version": "0.1.0",
   "description": "A linter that flags malformed and unterminated terminal escape sequences by line and column.",
+  "keywords": [
+    "ansi",
+    "escape-sequences",
+    "vt100",
+    "terminal",
+    "lint",
+    "osc",
+    "csi"
+  ],
+  "author": "patriciaw2",
   "type": "module",
   "main": "dist/rules.js",
   "types": "dist/rules.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/rules.d.ts",
+      "default": "./dist/rules.js"
+    },
+    "./scanner": {
+      "types": "./dist/scanner.d.ts",
+      "default": "./dist/scanner.js"
+    },
+    "./package.json": "./package.json"
+  },
   "bin": {
     "esc-code-lint": "dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/*.test.*",
+    "!dist/*.map"
   ],
   "scripts": {
     "build": "tsc",
-    "test": "npm run build && node --test dist/*.test.js"
+    "test": "npm run build && node --test dist/*.test.js",
+    "prepublishOnly": "npm test"
   },
   "engines": {
     "node": ">=18"
